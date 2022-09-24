@@ -161,7 +161,7 @@ class StockEnv(object):
         if buy_idx:
             can_buy= True
             while can_buy:
-                for i in sell_idx:
+                for i in buy_idx:
                     if self.funds_left >= self.stock_price[i]:
                         self.funds_left -= self.stock_price[i]
                         self.stock_owned[i] += 1
@@ -227,16 +227,9 @@ if __name__ == '__main__'          :
     models_folder = 'linear_rl_trader_models'
     rewards_folder = 'linear_rl_trader_rewards'
     n_ep = 1
-    batch_size = 64
     investment = 20000
     
-    
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-m', '-mode', type=bool, required = True,
-    #                    help = 'True if training')
-    # args = parser.parse_args()
-    
-    train = True
+    train = True #for testing --> False
     
     data = get_data()
     n_step,n_stock = data.shape
