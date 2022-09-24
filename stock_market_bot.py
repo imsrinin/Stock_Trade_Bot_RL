@@ -23,7 +23,7 @@ import pickle
 import itertools
 
 def get_data():
-    df = pd.read_csv('/Users/srini/Desktop/indep_study/RL_Udemy/machine_learning_examples-master/tf2.0/aapl_msi_sbux.csv') #rows = stcoks, cols = values of stock over time
+    df = pd.read_csv('/aapl_msi_sbux.csv') #rows = stcoks, cols = values of stock over time
     return df.values 
 
 def Buffer(env):
