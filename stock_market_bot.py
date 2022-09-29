@@ -21,9 +21,10 @@ from sklearn.preprocessing import StandardScaler
 import argparse
 import pickle
 import itertools
+from datetime import datetime
 
 def get_data():
-    df = pd.read_csv('/aapl_msi_sbux.csv') #rows = stcoks, cols = values of stock over time
+    df = pd.read_csv('/Users/srini/Desktop/indep_study/RL_Udemy/machine_learning_examples-master/tf2.0/aapl_msi_sbux.csv') #rows = stcoks, cols = values of stock over time
     return df.values 
 
 def Buffer(env):
@@ -66,7 +67,7 @@ class Model(object):
         self.b += self.mb
         
         mse = np.mean((Y-Yhat)**2)
-        self.loss(mse)
+        self.loss.append(mse)
         
     def save_model(self,path):
         np.savez(path,W=self.W,b=self.b)
@@ -193,28 +194,28 @@ class Agent(object):
         target_all[0,action] = target
         
         #SGD to train
-        self.model.grad(state,target_full)
+        self.model.grad(state,target_all)
         
         #minimizing exploration over time
         if self.ep > self.ep_min:
             self.ep *= self.ep_decay
         
-        def load(self,name):
-            self.model.load(name)
+    def load(self,name):
+            self.model.load_model(name)
         
-        def save(self,name):
-            self.model.save(name)
+    def save(self,name):
+            self.model.save_model(name)
             
 
 def play_ep(agent,env,is_train):
     s = env.reset()
     scaled = StandardScaler()
-    s = scaled.transform([s])
+    s = scaled.fit_transform([s])
     done = False
     while not done:
         a = agent.act(s)
         s_,r,done,info = env.step(a)
-        s_ = scaled.transform([s_])
+        s_ = scaled.fit_transform([s_])
         if is_train:
             agent.train(s,a,r,s_,done)
         s = s_
@@ -226,10 +227,16 @@ if __name__ == '__main__'          :
     #config variables
     models_folder = 'linear_rl_trader_models'
     rewards_folder = 'linear_rl_trader_rewards'
-    n_ep = 1
+    n_ep = 10000
     investment = 20000
     
-    train = True #for testing --> False
+    
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-m', '-mode', type=bool, required = True,
+    #                    help = 'True if training')
+    # args = parser.parse_args()
+    
+    train = True
     
     data = get_data()
     n_step,n_stock = data.shape
@@ -247,7 +254,7 @@ if __name__ == '__main__'          :
     
     #keep track of portfolio
     portfolio = []
-    if agrs.mode == False: # testing
+    if train == False: # testing
         with open(f'{models_folder}/buff.pkl','rb') as f:
             buff = pickle.load(f)
             
@@ -268,7 +275,7 @@ if __name__ == '__main__'          :
     if train:
         agent.save(f'{models_folder}/trade_bot.npz')
         
-        with open(f'{models_folder}/buff.pkl') as f:
+        with open(f'{models_folder}/buff.pkl', 'wb') as f:
             pickle.dump(buff,f)
         
         plt.plot(agent.model.loss)
